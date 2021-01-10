@@ -1,0 +1,52 @@
+########################
+# Spring boot properties
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+########################
+spring:
+  main:
+    banner-mode: console
+  output:
+    ansi:
+      enabled: ALWAYS
+  datasource:
+    hikari:
+      auto-commit: false
+      maximum-pool-size: 256
+  batch:
+    job:
+      enabled: false
+##################################
+server:
+  port: 8080
+  error:
+    whitelabel:
+      enabled: false
+    include-stacktrace: always
+    path: /error
+  jetty:
+    threads:
+      max: 250
+##################################
+management:
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: conditions,env,health,metrics,threaddump,prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+##################################
+logging:
+  file:
+    name: roach-batch.log
+  max-history: 3
+##################################
+history:
+  file: roach-batch-history.log
