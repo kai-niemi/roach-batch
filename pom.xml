@@ -22,11 +22,18 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.scm.id>github.com</project.scm.id>
 
         <jline.version>3.16.0</jline.version>
         <springshell.version>2.0.1.RELEASE</springshell.version>
         <awssdk.version>2.15.58</awssdk.version>
     </properties>
+
+    <scm>
+        <connection>scm:git:https://github.com/kai-niemi/roach-batch.git</connection>
+        <developerConnection>scm:git:https://github.com/kai-niemi/roach-batch.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <dependencies>
         <dependency>
@@ -238,6 +245,20 @@
                             </includes>
                         </fileset>
                     </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.amashchenko.maven.plugin</groupId>
+                <artifactId>gitflow-maven-plugin</artifactId>
+                <version>1.14.0</version>
+                <configuration>
+                    <fetchRemote>false</fetchRemote>
+                    <verbose>true</verbose>
+                    <gitFlowConfig>
+                        <!-- Single branch model -->
+                        <productionBranch>main</productionBranch>
+                        <developmentBranch>main</developmentBranch>
+                    </gitFlowConfig>
                 </configuration>
             </plugin>
         </plugins>
