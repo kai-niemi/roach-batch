@@ -1,0 +1,26 @@
+{
+  "name": "employee",
+  "comments": [
+    "--"
+  ],
+  "fields": [
+    {
+      "name": "id"
+    },
+    {
+      "name": "firstname"
+    },
+    {
+      "name": "lastname"
+    }
+  ],
+  "tokenizer": {
+    "type": "delimited",
+    "delimiter": ",",
+    "strict": true
+  },
+  "tableSchema": {
+    "create": "CREATE TABLE IF NOT EXISTS employee (id VARCHAR(10), firstname VARCHAR(100), lastname VARCHAR(100), primary key(id))",
+    "insert": "INSERT INTO employee (id,firstname,lastname) VALUES (?,?,?)"
+  }
+}

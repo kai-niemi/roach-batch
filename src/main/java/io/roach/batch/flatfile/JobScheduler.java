@@ -41,7 +41,7 @@ public class JobScheduler {
                             ItemReader<List<String>> itemReader,
                             ItemWriter<List<String>> itemWriter,
                             int batchSize) throws IOException {
-        Step step = stepBuilderFactory.get("flatFileJobStep")
+        Step step = stepBuilderFactory.get("processingStep")
                 .<List<String>, List<String>>chunk(batchSize)
                 .reader(itemReader)
                 .listener(new LoggingReadListener<>(inputResource, false))
@@ -50,7 +50,7 @@ public class JobScheduler {
                 .listener(new LoggingWriteListener<>())
                 .build();
 
-        Job job = jobBuilderFactory.get("flatFileJob")
+        Job job = jobBuilderFactory.get("importJob")
                 .incrementer(new RunIdIncrementer())
                 .flow(step)
                 .end()

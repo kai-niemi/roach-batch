@@ -23,7 +23,7 @@ public class DataSourceFactory {
     public DataSource createDataSource(DataSourceProperties properties) {
         HikariDataSource ds = new HikariDataSource();
         ds.setDataSource(properties.initializeDataSourceBuilder().build());
-        ds.setAutoCommit(false);
+        ds.setAutoCommit(true);
         ds.setMaximumPoolSize(maximumPoolSize);
         ds.setPoolName(properties.getName());
         ds.setConnectionInitSql("select 1");

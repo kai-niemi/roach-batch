@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.shell.ExitRequest;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -41,11 +40,6 @@ public class FlatFileCommands {
 
     @Autowired
     private DataSourceFactory dataSourceFactory;
-
-    @ShellMethod(value = "Pipe a source file to a destination (TEST 0)")
-    public void t0() throws IOException {
-        flatPipe("classpath:samples/test_sm.txt", "(stdout)", false);
-    }
 
     @ShellMethod(value = "Pipe a source file to a destination")
     public void flatPipe(
@@ -79,16 +73,6 @@ public class FlatFileCommands {
         }
     }
 
-    @ShellMethod(value = "Convert a flat file to CSV (TEST 1)")
-    public void t1() throws IOException {
-        flatToCSV("classpath:samples/test_sm.txt", "classpath:samples/test.json", 0, "(stdout)", 256, false);
-    }
-
-    @ShellMethod(value = "Convert a flat file to CSV (TEST 2)")
-    public void t2() throws IOException {
-        flatToCSV("classpath:samples/test_sm.txt", "classpath:samples/test.json", 0, "test.csv", 256, false);
-    }
-
     @ShellMethod(value = "Convert a flat file to CSV")
     public void flatToCSV(
             @ShellOption(help = "input file with fixed length columns") String inputFile,
@@ -119,11 +103,13 @@ public class FlatFileCommands {
             itemWriter = FlatFileStreamWriterBuilder.instance()
                     .setFlatFileSchema(flatFileSchema)
                     .setOutputWriter(new OutputStreamWriter(System.out))
+                    .setDelimiter(",")
                     .build();
         } else {
             itemWriter = FlatFileResourceWriterBuilder.instance()
                     .setFlatFileSchema(flatFileSchema)
                     .setOutputResource(new FileSystemResource(outputFile))
+                    .setDelimiter(",")
                     .build();
         }
 
@@ -134,19 +120,14 @@ public class FlatFileCommands {
         }
     }
 
-    @ShellMethod(value = "Convert a flat file to SQL inserts (TEST 3)")
-    public void t3() throws IOException {
-        flatToSQL("classpath:samples/test_sm.txt", "classpath:samples/test.json", 0, 256,
-                "jdbc:postgresql://192.168.1.99:26300/roach_batch?sslmode=disable", "root", "", false);
-    }
-
     @ShellMethod(value = "Convert a flat file to SQL inserts")
     public void flatToSQL(
             @ShellOption(help = "input file with fixed length columns") String inputFile,
             @ShellOption(help = "input file schema") String schemaFile,
             @ShellOption(help = "lines to skip", defaultValue = "0") int linesToSkip,
             @ShellOption(help = "batch size (items to read for each batch insert)", defaultValue = "512") int batchSize,
-            @ShellOption(help = "target database JDBC url", defaultValue = "jdbc:postgresql://localhost:26257/roach_batch?sslmode=disable") String jdbcUrl,
+            @ShellOption(help = "target database JDBC url", defaultValue = "jdbc:postgresql://localhost:26257/roach_batch?sslmode=disable")
+                    String jdbcUrl,
             @ShellOption(help = "target database JDBC user name", defaultValue = "root") String jdbcUsername,
             @ShellOption(help = "target database JDBC password") String jdbcPassword,
             @ShellOption(help = "quit after completion", defaultValue = "false") boolean quit
@@ -169,10 +150,10 @@ public class FlatFileCommands {
         properties.setUrl(jdbcUrl);
         properties.setUsername(jdbcUsername);
         properties.setPassword(jdbcPassword);
+        properties.setName(jdbcUrl);
 
         ItemWriter<List<String>> itemWriter = JdbcBatchWriterBuilder.instance()
-                .setProperties(properties)
-                .setDataSourceFactory(dataSourceFactory)
+                .setDataSource(dataSourceFactory.createDataSource(properties))
                 .setFlatFileSchema(flatFileSchema)
                 .build();
 

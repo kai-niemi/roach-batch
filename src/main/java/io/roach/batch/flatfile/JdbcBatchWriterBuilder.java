@@ -6,11 +6,9 @@ import javax.sql.DataSource;
 
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
 
-import io.roach.batch.config.DataSourceFactory;
 import io.roach.batch.flatfile.schema.FlatFileSchema;
 
 public class JdbcBatchWriterBuilder {
@@ -19,19 +17,12 @@ public class JdbcBatchWriterBuilder {
     }
 
     public static class Builder {
-        private DataSourceProperties properties;
-
-        private DataSourceFactory dataSourceFactory;
+        private DataSource dataSource;
 
         private FlatFileSchema flatFileSchema;
 
-        public Builder setProperties(DataSourceProperties properties) {
-            this.properties = properties;
-            return this;
-        }
-
-        public Builder setDataSourceFactory(DataSourceFactory dataSourceFactory) {
-            this.dataSourceFactory = dataSourceFactory;
+        public Builder setDataSource(DataSource dataSource) {
+            this.dataSource = dataSource;
             return this;
         }
 
@@ -41,8 +32,6 @@ public class JdbcBatchWriterBuilder {
         }
 
         public ItemWriter<List<String>> build() {
-            DataSource dataSource = dataSourceFactory.createDataSource(properties);
-
             if (StringUtils.hasLength(flatFileSchema.getTableSchema().getCreate())) {
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
                 jdbcTemplate.execute(flatFileSchema.getTableSchema().getCreate());
@@ -50,7 +39,7 @@ public class JdbcBatchWriterBuilder {
 
             JdbcBatchItemWriter<List<String>> itemWriter = new JdbcBatchItemWriter<>();
             itemWriter.setSql(flatFileSchema.getTableSchema().getInsert());
-            itemWriter.setDataSource(dataSourceFactory.createDataSource(properties));
+            itemWriter.setDataSource(dataSource);
             itemWriter.setItemPreparedStatementSetter((values, preparedStatement) -> {
                 int i = 1;
                 for (String v : values) {

@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ItemWriteListener;
+import org.springframework.dao.DataAccessException;
 
 public class LoggingWriteListener<T> implements ItemWriteListener<T> {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -25,6 +26,10 @@ public class LoggingWriteListener<T> implements ItemWriteListener<T> {
 
     @Override
     public void onWriteError(Exception ex, List<? extends T> items) {
-        logger.error("Write error near line {}: {}: {}", linesWritten, items, ex);
+        if (ex instanceof DataAccessException) {
+            logger.error("Data access error near line {}: {}: {}", linesWritten, items, ex.getLocalizedMessage());
+        } else {
+            logger.error("Write error near line {}: {}: {}", linesWritten, items, ex);
+        }
     }
 }

@@ -20,6 +20,8 @@ public class FlatFileStreamWriterBuilder {
 
         private Writer outputWriter;
 
+        private String delimiter = ",";
+
         public Builder setFlatFileSchema(FlatFileSchema flatFileSchema) {
             this.flatFileSchema = flatFileSchema;
             return this;
@@ -30,14 +32,22 @@ public class FlatFileStreamWriterBuilder {
             return this;
         }
 
+        public Builder setDelimiter(String delimiter) {
+            this.delimiter = delimiter;
+            return this;
+        }
+
         public ItemWriter<List<String>> build() {
+            DelimitedLineAggregator<List<String>> lineAggregator = new DelimitedLineAggregator<>();
+            lineAggregator.setDelimiter(delimiter);
+
             FlatFileStreamWriter<List<String>> itemWriter = new FlatFileStreamWriter<>();
-            itemWriter.setLineAggregator(new DelimitedLineAggregator<>());
+            itemWriter.setLineAggregator(lineAggregator);
             itemWriter.setOutputBufferedWriter(outputWriter);
             itemWriter.setHeaderCallback(writer -> writer
-                    .write(StringUtils.collectionToDelimitedString(flatFileSchema.allFieldNames(), ","))
+                    .write(StringUtils.collectionToDelimitedString(flatFileSchema.allFieldNames(), delimiter))
             );
-            itemWriter.open(new ExecutionContext());
+
             return itemWriter;
         }
     }

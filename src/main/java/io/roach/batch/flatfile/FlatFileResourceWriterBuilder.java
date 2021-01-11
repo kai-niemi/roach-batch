@@ -22,6 +22,8 @@ public abstract class FlatFileResourceWriterBuilder {
 
         private Resource outputResource;
 
+        private String delimiter = ",";
+
         public Builder setFlatFileSchema(FlatFileSchema flatFileSchema) {
             this.flatFileSchema = flatFileSchema;
             return this;
@@ -32,7 +34,15 @@ public abstract class FlatFileResourceWriterBuilder {
             return this;
         }
 
+        public Builder setDelimiter(String delimiter) {
+            this.delimiter = delimiter;
+            return this;
+        }
+
         public ItemWriter<List<String>> build() {
+            DelimitedLineAggregator<List<String>> lineAggregator = new DelimitedLineAggregator<>();
+            lineAggregator.setDelimiter(delimiter);
+
             return new FlatFileItemWriterBuilder<List<String>>()
                     .name(ClassUtils.getShortName(FlatFileItemWriter.class))
                     .resource(outputResource)
@@ -41,9 +51,9 @@ public abstract class FlatFileResourceWriterBuilder {
                     .saveState(false)
                     .transactional(false)
                     .forceSync(false)
-                    .lineAggregator(new DelimitedLineAggregator<>())
+                    .lineAggregator(lineAggregator)
                     .headerCallback(writer -> writer
-                            .write(StringUtils.collectionToDelimitedString(flatFileSchema.allFieldNames(), ",")))
+                            .write(StringUtils.collectionToDelimitedString(flatFileSchema.allFieldNames(), delimiter)))
                     .build();
         }
     }

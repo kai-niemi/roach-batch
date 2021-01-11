@@ -84,11 +84,11 @@ public class Application implements PromptProvider {
 
     @Override
     public AttributedString getPrompt() {
-        boolean offline = Arrays.stream(env.getActiveProfiles()).anyMatch(p -> p.equals("offline"));
-        if (offline) {
-            return new AttributedString("offline:$ ", AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
-        } else {
+        boolean onlineMode = Arrays.stream(env.getActiveProfiles()).anyMatch(p -> p.equals("proxy"));
+        if (onlineMode) {
             return new AttributedString("online:$ ", AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));
+        } else {
+            return new AttributedString("offline:$ ", AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
         }
     }
 }
