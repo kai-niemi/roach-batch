@@ -1,42 +1,44 @@
-# Roach Batch 
+Roach Batch is a batch-oriented data conversion and importing tool for CockroachDB, based
+on [Spring Batch](https://spring.io/projects/spring-batch#overview). 
 
-A batch-oriented data conversion and importing tool for CockroachDB, based on [Spring Batch](https://spring.io/projects/spring-batch#overview). 
-It can be used to read raw import files of various formats and convert these to a format compatible with CockroachDB
-IMPORT and IMPORT INTO commands. Alternatively, import directly to a target database using JDBC batch inserts.  
+It supports reading import files of various formats and converting these to a format compatible 
+with CockroachDB IMPORT and IMPORT INTO commands. Other alternatives include importing 
+directly to a target database using batch inserts. 
 
-Fixed width and delimited flat-files are the default:
+The currently supported usage modes:
 
-- A) Local or cloud storage flat file -> CSV import file/stream
-- B) Local or cloud storage flat file -> SQL batch inserts
+- **A) Local or cloud storage flat file -> CSV import file/stream**
+  - Read a fixed-width or delimited flat file either from a local file system, or a cloud storage bucket (S3)
+  - Convert to CSV format and pipe it to an output stream of choice
+  - A JSON document is used to define the source file layout (schema)
 
-The default method A) is to grab a fixed-width flat file either from the local file system
-or a cloud storage bucket (S3), convert it to CSV format and pipe it to an output stream of choice. 
-A JSON document is used to define the source file layout (schema).
+- **B) Local or cloud storage flat file -> SQL batch inserts**
+  - Similar to A) but instead uses JDBC batch inserts to directly write to a target database 
 
-The B) method does the same but uses JDBC batch inserts to directly write the converted items 
-to a target table.
+Other future mappings include:
 
-Other potential mappings include:
-
-- SQL query -> CSV import file/stream
-- SQL query -> SQL batch inserts
+- SQL query (cursor/pagination) -> CSV import file/stream
+- SQL query (cursor/pagination) -> SQL batch inserts
 - Kafka Topic -> CSV import
 - Kafka Topic -> SQL batch inserts
 - .. and so forth
 
-All available batch readers and writers:  
+All available Spring Batch readers and writers:  
 
 - [Item Readers](https://docs.spring.io/spring-batch/docs/4.3.x/reference/html/appendix.html#listOfReadersAndWriters)
 - [Item Writers](https://docs.spring.io/spring-batch/docs/4.3.x/reference/html/appendix.html#itemWritersAppendix)
 
-## Building
-
-See _Project Setup_ section below for building the single binary from source.
+## Building and Running
+                       
+Roach Batch is packaged as a single executable JAR file. See _Project Setup_ section below for 
+building it from source.
 
 ## Usage
 
-Roach Batch provides both a built-in shell (the default) and an HTTP API listener. The latter 
-is suitable to use in a proxy mode with CockroachDB IMPORT and IMPORT INTO commands, or wget / curl.
+Roach Batch provides a built-in shell and an HTTP API listener (optional). The latter is suitable to 
+use in a proxy mode with CockroachDB IMPORT and IMPORT INTO commands, or wget / curl. In that mode, it
+acts as proxy between CockroacHDB nodes and a remote cloud storage source endpoint, converting the
+input stream on-the-fly.
 
 Start the tool with:
 
@@ -46,17 +48,21 @@ Type `help` for additional guidance.
 
 To start in online mode with the HTTP API/proxy:
 
-    ./target/roach-batch.jar --proxy
+    ./target/roach-batch.jar
                                   
-Main endpoint:
+API root endpoint is then:
 
-    http://localhost:8080/download
+    http://localhost:8080
 
 ### Configuration
 
 All parameters in `application.yaml` can be overridden via CLI. See
 [Common Application Properties](http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html)
 for details.
+
+This file can be printed with:
+
+    ./roach-batch.jar --print-config
 
 ### Deployment
 
@@ -189,17 +195,24 @@ Install the JDK (Linux):
 
 ### Clone the project
 
-    git clone git@github.com:cockroachlabs/roach-batch.git
+    git clone git@github.com:kai-niemi/roach-batch.git
     cd roach-batch
 
 ### Build the executable jar 
 
     chmod +x mvnw
     ./mvnw clean install
+   
 
 ---
 
-## Appendix: Flat File Layout Schema
+## Terms of Use
+
+See [MIT](LICENSE.txt) for terms and conditions.
+
+---
+
+## Appendix A: Flat File Layout Schema
 
 The purpose of the field layout schema (in JSON format) is to describe the layout
 of the source files. Each fixed range field is mapped to a column in the delimited
@@ -230,4 +243,3 @@ The schema is fairly self-explanatory with the following key attributes:
     * create - the DDL statement for creating a table
     * insert - the DML statement for importing, column names and number should match fields
 
--- eof

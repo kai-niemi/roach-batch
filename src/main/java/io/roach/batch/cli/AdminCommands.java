@@ -50,7 +50,7 @@ public class AdminCommands implements Quit.Command {
     }
 
     @ShellMethod(value = "Print local system information")
-    public void systemInfo() {
+    public void printSystemInfo() {
         OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
         console.custom( Console.Color.WHITE,">> OS");
         console.info(" Arch: %s | OS: %s | Version: %s", os.getArch(), os.getName(), os.getVersion());
